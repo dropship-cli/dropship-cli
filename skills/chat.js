@@ -35,8 +35,8 @@ const tools = [
   {
     name: 'get_store_overview',
     description: 'Get store name, domain, plan, and basic info.',
-    input_schema: { type: 'object', properties: {}, required: [] },
-    async _execute() {
+    inputSchema: { type: 'object', properties: {}, required: [] },
+    async execute() {
       try {
         const [shop, products, orders] = await Promise.all([
           shopify.getShopInfo(),
@@ -52,14 +52,14 @@ const tools = [
   {
     name: 'get_products',
     description: 'Get product catalog with prices, vendors, variants, and status.',
-    input_schema: {
+    inputSchema: {
       type: 'object',
       properties: {
         limit: { type: 'number', description: 'Max products to return (default 50)' }
       },
       required: []
     },
-    async _execute(input) {
+    async execute(input) {
       try {
         const products = await shopify.getProducts({ fields: 'id,title,variants,vendor,product_type,status,created_at' })
         const list = products.slice(0, input?.limit || 50).map(p => ({
@@ -82,7 +82,7 @@ const tools = [
   {
     name: 'get_orders',
     description: 'Get recent orders with totals, fulfillment status, and line items.',
-    input_schema: {
+    inputSchema: {
       type: 'object',
       properties: {
         status: { type: 'string', description: 'Filter: any, open, closed, cancelled', default: 'any' },
@@ -90,7 +90,7 @@ const tools = [
       },
       required: []
     },
-    async _execute(input) {
+    async execute(input) {
       try {
         const orders = await shopify.getOrders({ status: input?.status || 'any', limit: String(input?.limit || 30) })
         const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0)
@@ -117,8 +117,8 @@ const tools = [
   {
     name: 'get_customers',
     description: 'Get customer list with order counts and spend.',
-    input_schema: { type: 'object', properties: {}, required: [] },
-    async _execute() {
+    inputSchema: { type: 'object', properties: {}, required: [] },
+    async execute() {
       try {
         const customers = await shopify.getCustomers()
         return {
@@ -141,14 +141,14 @@ const tools = [
   {
     name: 'search_supplier',
     description: 'Search CJ Dropshipping catalog for products with real supplier prices.',
-    input_schema: {
+    inputSchema: {
       type: 'object',
       properties: {
         keyword: { type: 'string', description: 'Product keyword to search' }
       },
       required: ['keyword']
     },
-    async _execute(input) {
+    async execute(input) {
       try {
         const cj = await import('../lib/cj.js')
         const products = await cj.searchProducts(input.keyword, { pageSize: 10 })
@@ -172,14 +172,14 @@ const tools = [
   {
     name: 'get_inventory',
     description: 'Check inventory levels for specific products.',
-    input_schema: {
+    inputSchema: {
       type: 'object',
       properties: {
         productTitle: { type: 'string', description: 'Product title to search for' }
       },
       required: []
     },
-    async _execute() {
+    async execute() {
       try {
         const products = await shopify.getProducts({ fields: 'id,title,variants' })
         return {
@@ -200,8 +200,8 @@ const tools = [
   {
     name: 'get_product_mappings',
     description: 'Get CJ-to-Shopify product mappings (which supplier products are linked to which store products).',
-    input_schema: { type: 'object', properties: {}, required: [] },
-    async _execute() {
+    inputSchema: { type: 'object', properties: {}, required: [] },
+    async execute() {
       const mappings = config.getProductMappings()
       return { count: Object.keys(mappings).length, mappings }
     }
@@ -212,7 +212,7 @@ const tools = [
 const anthropicTools = tools.map(t => ({
   name: t.name,
   description: t.description,
-  input_schema: t.input_schema
+  input_schema: t.inputSchema
 }))
 
 async function run() {
@@ -303,7 +303,7 @@ async function run() {
 
           try {
             logger.spin(`Checking ${block.name.replace(/_/g, ' ')}...`)
-            const result = await tool._execute(block.input)
+            const result = await tool.execute(block.input)
             logger.stopSpin(block.name.replace(/_/g, ' '))
             toolResults.push({
               type: 'tool_result',

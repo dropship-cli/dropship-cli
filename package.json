@@ -11,6 +11,40 @@
     "test": "node skills/self-test.js",
     "dev": "DEBUG=1 node bin/dropship.js"
   },
+  "keywords": [
+    "dropshipping",
+    "shopify",
+    "ai",
+    "cli",
+    "ecommerce",
+    "claude",
+    "automation",
+    "cj-dropshipping",
+    "autonomous",
+    "agent"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muhamamdaoun75-wq/dropship-cli.git"
+  },
+  "homepage": "https://github.com/muhamamdaoun75-wq/dropship-cli#readme",
+  "bugs": {
+    "url": "https://github.com/muhamamdaoun75-wq/dropship-cli/issues"
+  },
+  "author": "Phantom Store",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "skills/",
+    "CLAUDE.md",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
     "@supabase/supabase-js": "^2.99.0",

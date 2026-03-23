@@ -326,6 +326,16 @@ await test('bin/dropship.js is valid JS with all 29 commands', async () => {
   }
 })
 
+await test('bin/dropship.js enforces free tier limits', async () => {
+  const fs = await import('fs')
+  const code = fs.readFileSync(new URL('../bin/dropship.js', import.meta.url), 'utf8')
+  assert(code.includes('enforceFreeLimit'), 'Missing enforceFreeLimit calls')
+  assert(code.includes('incrementUsage'), 'Missing incrementUsage calls')
+  assert(code.includes("enforceFreeLimit('scoutResults'"), 'Missing scout limit enforcement')
+  assert(code.includes("enforceFreeLimit('sourcesPerMonth'"), 'Missing source limit enforcement')
+  assert(code.includes("enforceFreeLimit('chatTurnsPerDay'"), 'Missing chat limit enforcement')
+})
+
 await test('bin/dropship.js has shebang', async () => {
   const fs = await import('fs')
   const code = fs.readFileSync(new URL('../bin/dropship.js', import.meta.url), 'utf8')
@@ -348,6 +358,22 @@ await test('package.json bin entry correct', async () => {
   assert(pkg.scripts?.start, 'Missing start script')
   assert(pkg.name === 'dropship-cli', `Wrong name: ${pkg.name}`)
   assert(pkg.version, 'Missing version')
+})
+
+await test('package.json has npm publish fields', async () => {
+  const fs = await import('fs')
+  const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+  assert(pkg.repository, 'Missing repository')
+  assert(pkg.keywords?.length > 0, 'Missing keywords')
+  assert(pkg.engines?.node, 'Missing engines.node')
+  assert(pkg.files?.length > 0, 'Missing files')
+  assert(pkg.license === 'MIT', 'Missing or wrong license')
+})
+
+await test('LICENSE file exists', async () => {
+  const fs = await import('fs')
+  const exists = fs.existsSync(new URL('../LICENSE', import.meta.url))
+  assert(exists, 'Missing LICENSE file')
 })
 
 await test('package.json has all required dependencies', async () => {
@@ -378,6 +404,18 @@ await test('All npm dependencies installed', async () => {
       throw new Error(`Missing dependency: ${dep}`)
     }
   }
+})
+
+await test('skills/chat.js uses standard tool format (inputSchema/execute)', async () => {
+  const fs = await import('fs')
+  const code = fs.readFileSync(new URL('./chat.js', import.meta.url), 'utf8')
+  // Tools should define inputSchema (not input_schema) — the API conversion line is fine
+  assert(!code.includes('_execute'), 'chat.js should use execute not _execute')
+  assert(code.includes('inputSchema:'), 'chat.js missing inputSchema')
+  assert(code.includes('.execute('), 'chat.js missing .execute() calls')
+  // Ensure tool definitions use inputSchema, not input_schema
+  const toolDefs = code.match(/^\s+input_schema:\s*\{/gm) || []
+  assert(toolDefs.length === 0, 'chat.js tool definitions should use inputSchema not input_schema')
 })
 
 await test('No circular imports in core libs', async () => {
@@ -468,7 +506,7 @@ await test('File structure is complete', async () => {
     'skills/profit.js', 'skills/email.js', 'skills/doctor.js', 'skills/autopilot.js',
     'skills/returns.js', 'skills/inventory.js', 'skills/copy.js', 'skills/reviews.js', 'skills/legal.js', 'skills/notify.js', 'skills/upsell.js',
     'skills/self-test.js',
-    'package.json', 'CLAUDE.md'
+    'package.json', 'CLAUDE.md', 'LICENSE'
   ]
 
   for (const file of requiredFiles) {

@@ -143,9 +143,11 @@ program
   .action(async () => {
     logger.banner()
     await ensureConnected()
+    enforceFreeLimit('chatTurnsPerDay', 'chat turns today')
 
     const { default: chat } = await import('../skills/chat.js')
     await chat.run()
+    incrementUsage('chatTurnsPerDay')
   })
 
 // ─── status ─────────────────────────────────────────
@@ -169,9 +171,11 @@ program
   .action(async (opts) => {
     logger.banner()
     await ensureConnected()
+    enforceFreeLimit('scoutResults', 'scout searches')
 
     const { default: scout } = await import('../skills/scout.js')
     await scout.run(opts)
+    incrementUsage('scoutResults')
   })
 
 // ─── source ─────────────────────────────────────
@@ -183,9 +187,11 @@ program
   .action(async (query, opts) => {
     logger.banner()
     await ensureConnected()
+    enforceFreeLimit('sourcesPerMonth', 'product sources this month')
 
     const { default: source } = await import('../skills/source.js')
     await source.run({ query, ...opts })
+    if (!opts.dryRun) incrementUsage('sourcesPerMonth')
   })
 
 // ─── price ──────────────────────────────────────────
@@ -588,6 +594,17 @@ function requirePro(command) {
     logger.blank()
     logger.info('Upgrade: dropship activate DSC-YOUR-KEY')
     logger.dim('Get a key at https://dropship-cli.dev/pro')
+    process.exit(1)
+  }
+}
+
+function enforceFreeLimit(limitType, label) {
+  const result = checkLimit(limitType)
+  if (!result.allowed) {
+    logger.error(`Free tier limit reached: ${label}`)
+    if (result.limit) logger.dim(`  Used ${result.used}/${result.limit}`)
+    logger.blank()
+    logger.info('Upgrade to Pro for unlimited usage: dropship activate DSC-YOUR-KEY')
     process.exit(1)
   }
 }

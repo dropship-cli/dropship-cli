@@ -13,7 +13,7 @@ npm install -g dropship-cli
 Or clone and link locally:
 
 ```bash
-git clone https://github.com/youruser/dropship-cli.git
+git clone https://github.com/muhamamdaoun75-wq/dropship-cli.git
 cd dropship-cli
 npm install
 npm link
@@ -152,7 +152,7 @@ cp .env.example .env
 npm test
 ```
 
-Runs 63 self-tests covering all libs, skills, CLI commands, license system, and integration checks.
+Runs 64+ self-tests covering all libs, skills, CLI commands, license system, and integration checks.
 
 ## License
 
