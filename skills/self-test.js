@@ -286,8 +286,10 @@ await test('lib/oauth.js loads with all exports', async () => {
   assert(typeof mod.startOAuthFlow === 'function', 'Missing startOAuthFlow()')
   assert(typeof mod.SCOPES === 'string', 'Missing SCOPES')
   assert(typeof mod.DEFAULT_PORT === 'number', 'Missing DEFAULT_PORT')
+  assert(typeof mod.CLIENT_ID === 'string', 'Missing CLIENT_ID')
   assert(mod.SCOPES.includes('read_products'), 'SCOPES should include read_products')
   assert(mod.DEFAULT_PORT === 3456, `DEFAULT_PORT should be 3456, got ${mod.DEFAULT_PORT}`)
+  assert(mod.CLIENT_ID.length > 10, 'CLIENT_ID should be hardcoded')
 })
 
 await test('lib/config.js has product mapping methods', async () => {
@@ -382,8 +384,6 @@ await test('bin/dropship.js connect supports OAuth and --manual', async () => {
   const code = fs.readFileSync(new URL('../bin/dropship.js', import.meta.url), 'utf8')
   assert(code.includes("'--manual'"), 'Missing --manual flag')
   assert(code.includes('startOAuthFlow'), 'Missing OAuth flow integration')
-  assert(code.includes("'oauth'"), 'Missing oauth choice')
-  assert(code.includes('hasShopifyApp'), 'Missing hasShopifyApp check')
 })
 
 await test('bin/dropship.js has shebang', async () => {

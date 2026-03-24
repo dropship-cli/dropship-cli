@@ -27,7 +27,7 @@ const program = new Command()
 program
   .name('dropship')
   .description('AI-powered autonomous dropshipping operator')
-  .version('1.1.0')
+  .version('1.2.0')
   .addHelpText('before', `
   ⚡ DROPSHIP CLI — Claude Code for Dropshipping
   ───────────────────────────────────────────────
@@ -58,66 +58,24 @@ program
       validate: v => /^[a-z0-9-]+\.myshopify\.com$/i.test(v.trim()) || 'Must be like yourstore.myshopify.com'
     }])
 
-    // Step 2: Choose connection method
+    // Step 2: OAuth or manual
     let connected = false
     if (!opts.manual) {
-      const { method } = await inquirer.prompt([{
-        type: 'list',
-        name: 'method',
-        message: 'How do you want to connect?',
-        choices: [
-          { name: 'OAuth — Open browser to authorize (recommended)', value: 'oauth' },
-          { name: 'Manual — Paste Admin API access token', value: 'manual' }
-        ]
-      }])
+      logger.blank()
+      logger.info('Opening browser for authorization...')
+      logger.dim('If the browser does not open, copy the URL from the terminal.')
+      logger.blank()
 
-      if (method === 'oauth') {
-        // Ensure Shopify app credentials exist
-        if (!config.hasShopifyApp()) {
-          logger.blank()
-          logger.info('First-time OAuth setup — enter your Shopify app credentials.')
-          logger.dim('Create an app at https://partners.shopify.com → Apps → Create app')
-          logger.dim('Set redirect URL to: http://127.0.0.1:3456/callback')
-          logger.blank()
-
-          const appCreds = await inquirer.prompt([
-            {
-              type: 'input',
-              name: 'apiKey',
-              message: 'Shopify App API Key (Client ID):',
-              validate: v => v.length > 10 || 'API key too short'
-            },
-            {
-              type: 'password',
-              name: 'apiSecret',
-              message: 'Shopify App API Secret:',
-              validate: v => v.length > 10 || 'API secret too short'
-            }
-          ])
-          config.setShopifyApp(appCreds)
-          logger.success('App credentials saved (one-time setup)')
-        }
-
-        // Run OAuth flow
+      try {
+        const { startOAuthFlow } = await import('../lib/oauth.js')
+        const result = await startOAuthFlow(shop)
+        config.setShopify({ shop: result.shop, accessToken: result.accessToken })
+        connected = true
+        logger.success('Authorized via OAuth!')
+      } catch (err) {
+        logger.error(`OAuth failed: ${err.message}`)
+        logger.info('Falling back to manual token entry...')
         logger.blank()
-        logger.info('Opening browser for authorization...')
-        logger.dim('If the browser does not open, copy the URL from the terminal.')
-        logger.blank()
-
-        try {
-          const { startOAuthFlow } = await import('../lib/oauth.js')
-          const result = await startOAuthFlow(shop, {
-            apiKey: config.getShopifyApiKey(),
-            apiSecret: config.getShopifyApiSecret()
-          })
-          config.setShopify({ shop: result.shop, accessToken: result.accessToken })
-          connected = true
-          logger.success(`Authorized via OAuth!`)
-        } catch (err) {
-          logger.error(`OAuth failed: ${err.message}`)
-          logger.info('Falling back to manual token entry...')
-          logger.blank()
-        }
       }
     }
 
