@@ -1,6 +1,6 @@
 {
   "name": "dropship-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered autonomous dropshipping operator — Claude Code for dropshipping",
   "type": "module",
   "bin": {
