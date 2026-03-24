@@ -27,7 +27,7 @@ const program = new Command()
 program
   .name('dropship')
   .description('AI-powered autonomous dropshipping operator')
-  .version('1.0.0')
+  .version('1.0.1')
   .addHelpText('before', `
   ⚡ DROPSHIP CLI — Claude Code for Dropshipping
   ───────────────────────────────────────────────
