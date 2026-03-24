@@ -4,7 +4,7 @@
   "description": "AI-powered autonomous dropshipping operator — Claude Code for dropshipping",
   "type": "module",
   "bin": {
-    "dropship": "./bin/dropship.js"
+    "dropship": "bin/dropship.js"
   },
   "scripts": {
     "start": "node bin/dropship.js",
